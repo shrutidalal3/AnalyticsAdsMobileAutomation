@@ -1,0 +1,2 @@
+iHRTAdsTests/AndroidInlineAds.java
+ iHRTAdsTests.AndroidInlineAds
