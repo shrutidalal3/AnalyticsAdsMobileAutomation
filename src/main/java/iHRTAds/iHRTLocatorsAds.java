@@ -1,14 +1,20 @@
 package iHRTAds;
 
 import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.MobileBy;
+import io.appium.java_client.MobileElement;
 import io.appium.java_client.android.AndroidElement;
 import io.appium.java_client.pagefactory.AndroidFindBy;
 import io.appium.java_client.pagefactory.AppiumFieldDecorator;
 import io.appium.java_client.pagefactory.iOSXCUITFindBy;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
+import java.util.List;
 
 public class iHRTLocatorsAds {
 
@@ -110,7 +116,7 @@ public class iHRTLocatorsAds {
         @AndroidFindBy(id = "com.clearchannel.iheartradio.controller.debug:id/menu_playlists")
         private AndroidElement playlistTab;
 
-        public  boolean isDisplayed(){
+        public  boolean VerifyPlaylistTabisDisplayed(){
                 return playlistTab.isDisplayed();
         }
 
@@ -118,9 +124,53 @@ public class iHRTLocatorsAds {
                 playlistTab.click();
         }
 
+
+        @AndroidFindBy(id ="com.clearchannel.iheartradio.controller.debug:id/home_ad_view_holder")
+        public AndroidElement transistionAd;
+
+        public boolean VerifyTransistionAdDisplayed(){ return transistionAd.isDisplayed();}
+
+        @AndroidFindBy(id="com.clearchannel.iheartradio.controller.debug:id/home_ad_close_button")
+        private AndroidElement closeTransAd;
+
+         public void clickcloseTransAd(){
+                 closeTransAd.click();
+         }
+
+         @AndroidFindBy(xpath="//*[contains(@resource-id,\"inner_ad_container\")]//*[@resource-id=\"aw0\"]")
+        private AndroidElement inlineAd;
+
+         public boolean VerifyInlineAdDisplayed(){
+                 waitForVisibility(inlineAd);
+                 return inlineAd.isDisplayed();
+         }
+        private void waitForVisibility(WebElement element) throws Error{
+                new WebDriverWait(driver, 60)
+                        .until(ExpectedConditions.visibilityOf(element));
+        }
+
+        @AndroidFindBy(id="com.clearchannel.iheartradio.controller.debug:id/menu_podcasts")
+        private AndroidElement podcastTab;
+
+        public  boolean VerifyPodcastTabisDisplayed(){
+                return podcastTab.isDisplayed();
+        }
+
+        public  void clickPodcasttab(){
+                podcastTab.click();
+        }
+
         // @iOSXCUITFindBy(accessibility="AnimationOnboardingViewController-LoginButton-UIButton")
         //public static WebElement ioSLogin;
 
+        @AndroidFindBy(id= "com.clearchannel.iheartradio.controller.debug:id/station_logo")
+        private List<AndroidElement> ArtistRadio;
+
+        public void clickArtistRadio(){(ArtistRadio.get(4)).click();}
+
+
+        @AndroidFindBy(id="com.clearchannel.iheartradio.controller.debug:id/carousel_view")
+        public AndroidElement crousal;
     }
 
 

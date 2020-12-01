@@ -1,6 +1,8 @@
 package iHRTCommons;
 
 import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.MobileBy;
+import io.appium.java_client.MobileElement;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIBuilder;
 import org.openqa.selenium.WebElement;
@@ -26,11 +28,25 @@ public  class Utilities {
     public Utilities() throws ClassNotFoundException {
     }
 
+    /**
+     * This method waits for visibility of element
+     * @param driver
+     * @param element
+     */
     public static void Wait(AppiumDriver driver,WebElement element){
 
-        new WebDriverWait(driver,10).until(ExpectedConditions.visibilityOf(element));
+        new WebDriverWait(driver,5).until(ExpectedConditions.visibilityOf(element));
 
 
+    }
+    /**
+     * This method waits till element is clickable
+     * @param driver
+     * @param element
+     */
+    public static void waitForVisibility(AppiumDriver driver,WebElement element) throws Error{
+        new WebDriverWait(driver, 60)
+                .until(ExpectedConditions.elementToBeClickable(element));
     }
 
  public static String getAdbLogCat(){
@@ -78,7 +94,8 @@ public  class Utilities {
         return StreamSupport.stream(logs.spliterator(), false)
                 .filter((I)->I.getMessage().contains("https://pubads.g.doubleclick.net/gampad/ads"))
                 .filter((I)->I.getMessage().contains("Debug CONTENT"))
-                .filter((I)->I.getMessage().contains("cust_params"));
+                .filter((I)->I.getMessage().contains("cust_params"))
+                .filter((I)->I.getMessage().contains("ccrpos=8004"));
 
 
 
@@ -97,13 +114,37 @@ public  class Utilities {
  }
 
     public static String getParamValue(String link, String paramName) throws URISyntaxException {
-        List<NameValuePair> queryParams = new URIBuilder(link).getQueryParams();
-        return queryParams.stream()
-                .filter(param -> param.getName().equalsIgnoreCase(paramName))
-                .map(NameValuePair::getValue)
-                .findFirst()
-                .orElse("");
+        List<NameValuePair> queryParams= new URIBuilder(link).getQueryParams();
+        String filteredValue="";
+     try {
+
+        filteredValue= queryParams.stream()
+                 .filter(param -> param.getName().equalsIgnoreCase(paramName))
+                 .map(NameValuePair::getValue)
+                 .findFirst()
+                 .orElse("");
+     }
+     catch (Exception e){
+        filteredValue= queryParams.stream()
+                 .filter(param -> param.getName().equalsIgnoreCase(paramName))
+                 .map(NameValuePair::getValue)
+                 .findFirst()
+                 .orElse("");
+     }
+     return filteredValue;
     }
+
+    /**
+     * This method works for Android to scroll to the given text on the page
+     * @param driverAgent1
+     * @param text- expected Text for scrolling to
+     */
+    public static void scrolltoIntoView(AppiumDriver driverAgent1,String text){
+        MobileElement element = (MobileElement) driverAgent1.findElement(MobileBy.AndroidUIAutomator("new UiScrollable(new UiSelector().scrollable(true))"+
+                ".scrollIntoView(new UiSelector().text(\""+text+"\"))"));
+    }
+
+
 
 
 }

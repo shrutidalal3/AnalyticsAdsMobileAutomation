@@ -19,6 +19,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+import org.testng.asserts.SoftAssert;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,27 +35,10 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class AndroidInlineAds {
+public class AndroidInlineAds extends BaseTest{
 
+    static Logger logger = Logger.getLogger(AndroidInlineAds.class.getName());
 
-    private AppiumDriver driver;
-    private AppiumDriverLocalService services;
-    private static Logger log = Logger.getLogger(AndroidInlineAds.class.getName());
-
-
-    @BeforeTest
-    public void start() throws TimeoutException, IOException, URISyntaxException {
-
-
-    }
-
-    @AfterTest
-    public void quit() throws IOException, InterruptedException {
-
-        services.stop();
-        //driver.quit();
-
-    }
 
     @Test(enabled = false)
     void AndroidSetupTest() throws TimeoutException, IOException, URISyntaxException, InterruptedException {
@@ -119,9 +103,10 @@ public class AndroidInlineAds {
                 if(message.contains("cust_params")) {
                     String cust_params = Utilities.getParamValue(message.substring(message.indexOf("uri") + 6),"cust_params");
                     if(cust_params.contains("hometab=yourlibrary")){
-                        System.out.println("Required Ads Request has cust_params: "+  cust_params);
+                        logger.info("Required Ads Request has cust_params: "+  cust_params);
                     }
-                    else System.out.println("Printing Else.........Required Ads Request has cust_params: "+  cust_params);
+                   //logger.log(info,"Printing Else.........Required Ads Request has cust_params: "+  cust_params);
+                    else logger.info("Printing Else.........Required Ads Request has cust_params: "+  cust_params);
 
 
 
@@ -161,9 +146,9 @@ public class AndroidInlineAds {
                 if(message.contains("cust_params")) {
                     String cust_params = Utilities.getParamValue(message.substring(message.indexOf("uri") + 6),"cust_params");
                     if(cust_params.contains("hometab=radio")){
-                        System.out.println("Required Ads Request has cust_params: "+  cust_params);
+                        logger.info("Required Ads Request has cust_params: "+  cust_params);
                     }
-                    else System.out.println("Printing Else.........Required Ads Request has cust_params: "+  cust_params);
+                    else logger.info("Printing Else.........Required Ads Request has cust_params: "+  cust_params);
 
 
 
@@ -190,11 +175,11 @@ public class AndroidInlineAds {
         File FC = new File(TestFile);
         FC.createNewFile();
         PrintWriter pw = new PrintWriter(TestFile);
-        System.out.println("suported log types: " + logtypes.toString());
+        logger.info("suported log types: " + logtypes.toString());
         //List<LogEntry> logs = driver.manage().logs().get("logcat").getAll();
 
 
-        System.out.println("Printing App Launch Logs..................");
+        logger.info("Printing App Launch Logs..................");
 
 
         iHRTLogin.LiveRadioSelect(driver);
@@ -214,11 +199,11 @@ public class AndroidInlineAds {
             if(message.contains("Debug CONTENT")){
                 if(message.contains("cust_params")) {
                     if(message.contains("ccrpos=8004"))
-                        System.out.println("Printing Headers: " + message.substring(message.indexOf("uri")+6));
+                        logger.info("Printing Headers: " + message.substring(message.indexOf("uri")+6));
 
                     List<NameValuePair> params = URLEncodedUtils.parse(new URI(message.substring(message.indexOf("uri")+6)), Charset.forName("UTF-8"));
                     for(NameValuePair param: params){
-                        System.out.println(param.getName() + ":"+param.getValue());
+                        logger.info(param.getName() + ":"+param.getValue());
                         pw.println(param.getName() + ":"+param.getValue());
                     }
 
@@ -234,9 +219,9 @@ public class AndroidInlineAds {
         //var message =StreamSupport.stream(secondCallToLogs.spliterator(), false).filter((d)->d.getMessage().contains("pubads.g.doubleclick.net")).limit(10).findFirst().get();
         //System.out.println(message);
 
-        System.out.println("Printing only Live station Http logs:.............");
+        logger.info("Printing only Live station Http logs:.............");
 
-        System.out.println(Utilities.getAdbLogCat());
+        logger.info(Utilities.getAdbLogCat());
 
         //Utilities.Wait(driver, locs.liveStation);
         //locs.liveStation.isDisplayed();
@@ -255,31 +240,36 @@ public class AndroidInlineAds {
 
     @Test
     void PlaylistDirectoryInlineAds() throws TimeoutException, IOException, URISyntaxException, InterruptedException {
+       locs = new iHRTLocatorsAds(driver);
 
-        services = AdsDriverSetUp.AppiumServerStart();
-        AppiumDriver driver = AdsDriverSetUp.getDriver("Android", services);
-        iHRTLocatorsAds locs = new iHRTLocatorsAds(driver);
         Thread.sleep(10000);
         driver.getPageSource();
         LogEntries StartLogs = driver.manage().logs().get("logcat");
-        if(locs.isDisplayed()){
-            locs.clickPlaylistatb();
-            Thread.sleep(10000);
-            System.out.println("Playlist tab loaded");
-        }
-        VerifyAds.VerifyInlineAdDisplayed(driver);
+        softAssert.assertTrue(locs.VerifyPlaylistTabisDisplayed());
+        locs.clickPlaylistatb();
+        logger.info("Playlist tab loaded");
+       iHRTLogin.DismissTransistionAd(driver);
+       softAssert.assertTrue(locs.VerifyInlineAdDisplayed());
+        //VerifyAds.VerifyInlineAdDisplayed(driver);
+        Thread.sleep(5000);
         LogEntries secondCallToLogs = driver.manage().logs().get("logcat");
+
+        logger.info( Utilities.getAdsLogStreams(secondCallToLogs).toString());
+        Utilities.getAdsLogStreams(secondCallToLogs).forEach(s->System.out.println(s));
         for(LogEntry log : secondCallToLogs) {
             var message = log.getMessage();
 
             if (message.contains("Debug CONTENT")) {
                 if (message.contains("cust_params")) {
                     String cust_params = Utilities.getParamValue(message.substring(message.indexOf("uri") + 6), "cust_params");
-                    Assert.assertTrue(cust_params.contains("hometab=playlists")); {
-                        System.out.println("Required Ads Request has cust_params: " + cust_params);
+                    softAssert.assertTrue(cust_params.contains("hometab=playlist"));
+                    softAssert.assertTrue(cust_params.contains("ccrpos=8004"));
+                    //Assert.assertTrue(cust_params.contains("hometab=playlists"));
+                    {
+                        logger.info("Required Ads Request has cust_params: " + cust_params);
 
                         if(cust_params.contains("ccrpos=8004")){
-                            System.out.println("Required Inline ad and ad request is displayed, with ccrpos = 8004 and hometab = playlists");
+                            logger.info("Required Inline ad and ad request is displayed, with ccrpos = 8004 and hometab = playlists");
                             break;
                         }
                     } //else System.out.println("Printing Else.........Required Ads Request has cust_params: " + cust_params);
@@ -287,11 +277,117 @@ public class AndroidInlineAds {
 
                 }
             }
+
+            softAssert.assertAll();
         }
     }
 
     @Test
-    void PodcastDirectoryInlineAds(){}
+    void PlaylistSectionInlineAds() throws TimeoutException, IOException, URISyntaxException, InterruptedException {
+
+        locs = new iHRTLocatorsAds(driver);
+
+        Thread.sleep(10000);
+        driver.getPageSource();
+        LogEntries StartLogs = driver.manage().logs().get("logcat");
+        softAssert.assertTrue(locs.VerifyPlaylistTabisDisplayed());
+        locs.clickPlaylistatb();
+        log.info("Playlist tab loaded");
+        iHRTLogin.DismissTransistionAd(driver);
+    }
+
+    @Test
+    void PodcastDirectoryInlineAds() throws InterruptedException, URISyntaxException {
+        locs = new iHRTLocatorsAds(driver);
+
+        Thread.sleep(10000);
+        driver.getPageSource();
+        LogEntries StartLogs = driver.manage().logs().get("logcat");
+        softAssert.assertTrue(locs.VerifyPodcastTabisDisplayed());
+        locs.clickPodcasttab();
+        log.info("Podcast tab loaded");
+        iHRTLogin.DismissTransistionAd(driver);
+        softAssert.assertTrue(locs.VerifyInlineAdDisplayed());
+        //VerifyAds.VerifyInlineAdDisplayed(driver);
+        Thread.sleep(5000);
+        LogEntries secondCallToLogs = driver.manage().logs().get("logcat");
+        for(LogEntry log : secondCallToLogs) {
+            var message = log.getMessage();
+
+            if (message.contains("Debug CONTENT")) {
+                if (message.contains("cust_params")) {
+                    String cust_params = Utilities.getParamValue(message.substring(message.indexOf("uri") + 6), "cust_params");
+                    softAssert.assertTrue(cust_params.contains("hometab=podcast"));
+                    softAssert.assertTrue(cust_params.contains("ccrpos=8004"));
+                    //Assert.assertTrue(cust_params.contains("hometab=playlists"));
+                    {
+                        System.out.println("Required Ads Request has cust_params: " + cust_params);
+
+                        if(cust_params.contains("ccrpos=8004")){
+                            System.out.println("Required Inline ad and ad request is displayed, with ccrpos = 8004 and hometab = podcast");
+                            break;
+                        }
+                    } //else System.out.println("Printing Else.........Required Ads Request has cust_params: " + cust_params);
+
+
+                }
+            }
+
+            softAssert.assertAll();
+        }
+    }
+
+    @Test
+    void ArtistRadioInlineAd() throws InterruptedException, URISyntaxException {
+        locs = new iHRTLocatorsAds(driver);
+
+        Thread.sleep(10000);
+        driver.getPageSource();
+        LogEntries StartLogs = driver.manage().logs().get("logcat");
+        iHRTLogin.LiveRadioSelect(driver);
+        logger.info("navigated to live radio tab");
+        iHRTLogin.DismissTransistionAd(driver);
+        //iHRTLogin.scrolltoRecommendedArtist(driver);
+        Utilities.scrolltoIntoView(driver,"Genres");
+        Thread.sleep(10000);
+        iHRTLogin.selectArtistRadio(driver);
+        //locs.clickArtistRadio();
+        Thread.sleep(10000);
+        softAssert.assertTrue(locs.VerifyInlineAdDisplayed());
+        Thread.sleep(10000);
+        LogEntries secondCallToLogs = driver.manage().logs().get("logcat");
+        for(LogEntry log : secondCallToLogs) {
+            var message = log.getMessage();
+
+            if (message.contains("Debug CONTENT")) {
+                if (message.contains("cust_params")) {
+                    if(message.contains("ccrpos=8004")){
+                        String cust_params = Utilities.getParamValue(message.substring(message.indexOf("uri") + 6), "cust_params");
+                        softAssert.assertTrue(cust_params.contains("hometab=artistprofile"));
+                        softAssert.assertTrue(cust_params.contains("ccrpos=8004"));
+                        //Assert.assertTrue(cust_params.contains("hometab=playlists"));
+                        {
+                            System.out.println("Required Ads Request has cust_params: " + cust_params);
+
+                            if(cust_params.contains("ccrpos=8004")){
+                                System.out.println("Required Inline ad and ad request is displayed, with ccrpos = 8004 and hometab = artistprofile");
+                                break;
+                            }
+
+                    }
+
+
+                    }
+                    else System.out.println("Printing Else.........Required Ads Request has cust_params: " );
+
+
+                }
+            }
+
+            softAssert.assertAll();
+        }
+
+    }
 
     @Test
     void SampleTest(){

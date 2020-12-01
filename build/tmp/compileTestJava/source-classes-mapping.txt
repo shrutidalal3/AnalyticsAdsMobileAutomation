@@ -1,2 +1,4 @@
 iHRTAdsTests/AndroidInlineAds.java
  iHRTAdsTests.AndroidInlineAds
+iHRTAdsTests/BaseTest.java
+ iHRTAdsTests.BaseTest

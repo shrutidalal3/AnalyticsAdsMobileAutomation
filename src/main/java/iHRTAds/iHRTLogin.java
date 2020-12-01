@@ -1,20 +1,24 @@
 package iHRTAds;
 
 import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.MobileBy;
 import io.appium.java_client.MobileElement;
 import io.appium.java_client.TouchAction;
 import io.appium.java_client.touch.WaitOptions;
 import io.appium.java_client.touch.offset.PointOption;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
+import org.openqa.selenium.logging.LogEntries;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
+import java.util.List;
+import java.util.logging.Logger;
 
 public class iHRTLogin {
+    public static  iHRTLocatorsAds locs;
+    private static Logger log = Logger.getLogger(iHRTLogin.class.getName());
+
     /**
      * This method selects Login button
      * @param driverAgent1
@@ -153,12 +157,12 @@ public class iHRTLogin {
 
     }
 
-public static void SelectYourLibrary(AppiumDriver driverAgent1){
+    public static void SelectYourLibrary(AppiumDriver driverAgent1){
         WebElement yourlib = driverAgent1.findElement(By.id(iHRTLocatorsAds.YourLibrary));
         yourlib.click();
 }
 
-public static void DismissFirstLoginAlert(AppiumDriver driverAgent1){
+    public static void DismissFirstLoginAlert(AppiumDriver driverAgent1){
     WebDriverWait wait = new WebDriverWait(driverAgent1,10);
     wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(iHRTLocatorsAds.intialpopup_id)));
 
@@ -166,6 +170,36 @@ public static void DismissFirstLoginAlert(AppiumDriver driverAgent1){
             driverAgent1.findElement(By.id(iHRTLocatorsAds.intialPopupDismiss)).click();
     }
         else {System.out.println("No Alert found.");}
+}
+
+    public static void DismissTransistionAd(AppiumDriver driverAgent1){
+        try {
+            locs = new iHRTLocatorsAds(driverAgent1);
+            WebDriverWait wait = new WebDriverWait(driverAgent1, 5);
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(iHRTLocatorsAds.transistionads)));
+            if (locs.transistionAd.isDisplayed()) {
+                log.info("Transistion ad is displayed");
+                locs.clickcloseTransAd();
+                log.info("clicked on dismiss to close transistion ad ");
+                LogEntries transistionadslogs = driverAgent1.manage().logs().get("logcat");
+            } else log.info("No transistion ad displayed");
+
+        }
+        catch (Exception e){
+            System.out.println("No transistion ad is displayed");
+        }
+}
+
+    public static void scrolltoRecommendedArtist(AppiumDriver driverAgent1){
+        MobileElement element = (MobileElement) driverAgent1.findElement(MobileBy.AndroidUIAutomator("new UiScrollable(new UiSelector().scrollable(true))"+
+                ".scrollIntoView(new UiSelector().text(\""+"Genres"+"\"))"));
+}
+
+    public static void selectArtistRadio(AppiumDriver driverAgent1){
+MobileElement element = (MobileElement) driverAgent1.findElement(MobileBy.AndroidUIAutomator("new UiSelector().resourceIdMatches(\".*.id/carousel_view\")" +
+        ".childSelector(new UiSelector().resourceIdMatches(\".*.id/station_logo\"))"));  //".*.id/station_logo"
+element.click();
+
 }
 
 }
